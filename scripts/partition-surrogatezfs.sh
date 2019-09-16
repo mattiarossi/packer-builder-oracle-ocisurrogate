@@ -4,8 +4,10 @@
 
 #Create ZFS pool and datasets
 
-partprobe
-zpool create   -f  -o altroot=/mnt     -o ashift=12     -o cachefile=/etc/zfs/zpool.cache     -O canmount=off     -O compression=lz4     -O atime=off     -O normalization=formD   -o feature@hole_birth=disabled -o feature@embedded_data=disabled -m none     rpool     /dev/sdb3
+parted /dev/sdb print
+sleep 10
+zpool create   -n -f  -o altroot=/mnt     -o ashift=12     -o cachefile=/etc/zfs/zpool.cache     -O canmount=off     -O compression=lz4     -O atime=off     -O normalization=formD   -o feature@hole_birth=disabled -o feature@embedded_data=disabled -m none rpool /dev/sdb3
+zpool create   -f  -o altroot=/mnt     -o ashift=12     -o cachefile=/etc/zfs/zpool.cache     -O canmount=off     -O compression=lz4     -O atime=off     -O normalization=formD   -o feature@hole_birth=disabled -o feature@embedded_data=disabled -m none rpool /dev/sdb3
 zfs create     -o canmount=off     -o mountpoint=none     rpool/ROOT
 zfs create     -o canmount=noauto     -o mountpoint=/     rpool/ROOT/oel
 zpool status
