@@ -1,4 +1,9 @@
 #!/bin/bash
+
+## Second stage of the bootstrap script
+
+#Create ZFS pool and datasets
+
 partprobe
 zpool create   -f  -o altroot=/mnt     -o ashift=12     -o cachefile=/etc/zfs/zpool.cache     -O canmount=off     -O compression=lz4     -O atime=off     -O normalization=formD   -o feature@hole_birth=disabled -o feature@embedded_data=disabled -m none     rpool     /dev/sdb3
 zfs create     -o canmount=off     -o mountpoint=none     rpool/ROOT
@@ -20,9 +25,14 @@ zfs set quota=8G rpool/var
 zfs set quota=8G rpool/home
 zfs list
 mkswap /dev/zvol/rpool/swap
+
+#Setup EFI and Boot partitions
 fs_uuid=$(blkid -o value -s UUID /dev/sda1| tr -d "-"); echo $fs_uuid
 mkfs.msdos -i $fs_uuid /dev/sdb1
 mkfs.ext4 /dev/sdb2
+
+#Setup chroot environment
+
 mkdir -p /mnt/boot
 mount /dev/sdb2 /mnt/boot
 mkdir -p /mnt/boot/efi
