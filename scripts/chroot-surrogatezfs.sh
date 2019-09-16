@@ -7,7 +7,7 @@ grub2-mkconfig -o /boot/efi/EFI/redhat/grub.cfg
 sed -i "s/.*set root.*/        set root='hd0,gpt2'/" /boot/efi/EFI/redhat/grub.cfg
 sed -i 's/root=ZFS=(null)\/ROOT\/oel//' /boot/efi/EFI/redhat/grub.cfg
 
-
+zpool set cachefile= rpool
 dracut -f -v
 sed -i '/\/.*xfs/s/^/# /' /etc/fstab
 sed -i 's/.*swap.*/\/dev\/zvol\/rpool\/swap\tswap\tswap\t defaults,_netdev,x-initrd.mount 0 0/' /etc/fstab
