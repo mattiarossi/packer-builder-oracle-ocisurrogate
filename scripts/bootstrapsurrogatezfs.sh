@@ -28,8 +28,8 @@ zfs create     -o mountpoint=/var/log     rpool/var/log
 zfs create     -o mountpoint=/tmp     rpool/tmp
 zfs create -V 4G -b $(getconf PAGESIZE) -o compression=zle       -o logbias=throughput -o sync=always       -o primarycache=metadata -o secondarycache=none       -o com.sun:auto-snapshot=false rpool/swap
 zfs set quota=8G rpool/tmp
-zfs set quota=16G rpool/var
-zfs set quota=16G rpool/home
+zfs set quota=8G rpool/var
+zfs set quota=8G rpool/home
 zfs list
 mkswap /dev/zvol/rpool/swap
 fs_uuid=$(blkid -o value -s UUID /dev/sda1| tr -d "-"); echo $fs_uuid
