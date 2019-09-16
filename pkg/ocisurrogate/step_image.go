@@ -14,12 +14,58 @@ func (s *stepImage) Run(ctx context.Context, state multistep.StateBag) multistep
 	var (
 		driver     = state.Get("driver").(Driver)
 		ui         = state.Get("ui").(packer.Ui)
-		instanceID = state.Get("instance_id").(string)
+		idVolume   = state.Get("cloned_volume_id").(string)
+		attachedVolumeID   = state.Get("attached_volume_id").(string)
+		config = state.Get("config").(*Config)
 	)
 
-	ui.Say("Creating image from instance...")
+	ui.Say("Detaching Boot Volume from main instance...")
+    detachedVolumeID, err := driver.DetachBootClone(ctx, attachedVolumeID)
+	if err != nil {
+		err = fmt.Errorf("Problem Detaching Boot Volume Clone: %s", err)
+		ui.Error(err.Error())
+		state.Put("error", err)
+		return multistep.ActionHalt
+	}
+	ui.Say(fmt.Sprintf("Surrogate Boot Volume Detachment request created for %s.",detachedVolumeID))
+	ui.Say(fmt.Sprintf("Waiting for Attached Volume %s to enter 'DETACHED' state...",attachedVolumeID))
+	if err = driver.WaitForVolumeAttachmentState(ctx, attachedVolumeID, []string{"DETACHING"}, "DETACHED"); err != nil {
+		err = fmt.Errorf("Error waiting for Volume to be detached: %s", err)
+		ui.Error(err.Error())
+		state.Put("error", err)
+		return multistep.ActionHalt
+	}
 
-	image, err := driver.CreateImage(ctx, instanceID)
+	ui.Say("Cloned Volume detached...")
+	ui.Say("Creating Surrogate instance...")
+
+	instanceSurrogateID, err := driver.CreateInstance(ctx, string(config.Comm.SSHPublicKey), idVolume)
+	if err != nil {
+		err = fmt.Errorf("Problem creating surrogate instance: %s", err)
+		ui.Error(err.Error())
+		state.Put("error", err)
+		return multistep.ActionHalt
+	}
+
+	state.Put("instance_surrogate_id", instanceSurrogateID)
+
+	ui.Say(fmt.Sprintf("Created Surrogate instance (%s).", instanceSurrogateID))
+
+	ui.Say("Waiting for Surrogate instance to enter 'RUNNING' state...")
+
+	if err = driver.WaitForInstanceState(ctx, instanceSurrogateID, []string{"STARTING", "PROVISIONING"}, "RUNNING"); err != nil {
+		err = fmt.Errorf("Error waiting for instance to start: %s", err)
+		ui.Error(err.Error())
+		state.Put("error", err)
+		return multistep.ActionHalt
+	}
+
+	ui.Say("Surrogate Instance 'RUNNING'.")
+
+
+	ui.Say("Creating image from Surrogate instance...")
+
+	image, err := driver.CreateImage(ctx, instanceSurrogateID)
 	if err != nil {
 		err = fmt.Errorf("Error creating image from instance: %s", err)
 		ui.Error(err.Error())
@@ -45,5 +91,31 @@ func (s *stepImage) Run(ctx context.Context, state multistep.StateBag) multistep
 }
 
 func (s *stepImage) Cleanup(state multistep.StateBag) {
-	// Nothing to do
+	driver := state.Get("driver").(Driver)
+	ui := state.Get("ui").(packer.Ui)
+
+	idRaw, ok := state.GetOk("instance_surrogate_id")
+	if !ok {
+		return
+	}
+	id := idRaw.(string)
+
+	ui.Say(fmt.Sprintf("Terminating instance (%s)...", id))
+
+	if err := driver.TerminateInstance(context.TODO(), id); err != nil {
+		err = fmt.Errorf("Error terminating instance. Please terminate manually: %s", err)
+		ui.Error(err.Error())
+		state.Put("error", err)
+		return
+	}
+
+	err := driver.WaitForInstanceState(context.TODO(), id, []string{"TERMINATING"}, "TERMINATED")
+	if err != nil {
+		err = fmt.Errorf("Error terminating instance. Please terminate manually: %s", err)
+		ui.Error(err.Error())
+		state.Put("error", err)
+		return
+	}
+
+	ui.Say("Terminated instance.")
 }

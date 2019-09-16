@@ -46,7 +46,7 @@ func NewDriverOCI(cfg *Config) (Driver, error) {
 }
 
 // CreateInstance creates a new compute instance.
-func (d *driverOCI) CreateInstance(ctx context.Context, publicKey string) (string, error) {
+func (d *driverOCI) CreateInstance(ctx context.Context, publicKey string, surrogateVolumeId string) (string, error) {
 	metadata := map[string]string{
 		"ssh_authorized_keys": publicKey,
 	}
@@ -72,6 +72,11 @@ func (d *driverOCI) CreateInstance(ctx context.Context, publicKey string) (strin
     var sourcedetails core.InstanceSourceDetails = core.InstanceSourceViaImageDetails{
 		ImageId:            &imageId,
     	BootVolumeSizeInGBs:	&d.cfg.BootVolumeSizeInGBs,
+    }
+    if surrogateVolumeId != "" {
+    	sourcedetails = core.InstanceSourceViaBootVolumeDetails{
+    		BootVolumeId: &surrogateVolumeId,
+    	}
     }
     instanceDetails := core.LaunchInstanceDetails{
 		AvailabilityDomain: &d.cfg.AvailabilityDomain,
@@ -148,6 +153,23 @@ func (d *driverOCI) AttachBootClone(ctx context.Context, InstanceId string, Volu
 	}
 	return *res2.VolumeAttachment.GetId(), nil
 }
+
+// DetachBootClone attaches a clone of the boot disk to the instance.
+func (d *driverOCI) DetachBootClone(ctx context.Context,VolumeAttachmentId string) (string, error) {
+	// Get Instance Details
+	log.Printf("Detaching Cloned Volume Attachment %s", VolumeAttachmentId)
+	res2, err2 := d.computeClient.DetachVolume(ctx, core.DetachVolumeRequest{
+		 VolumeAttachmentId: &VolumeAttachmentId,
+		 },
+	)
+	log.Printf("Detaching Cloned Volume Attachment Request %v", res2)
+
+	if err2 != nil {
+		return "", err2
+	}
+	return VolumeAttachmentId, nil
+}
+
 
 // CreateImage creates a new custom image.
 func (d *driverOCI) CreateImage(ctx context.Context, id string) (core.Image, error) {

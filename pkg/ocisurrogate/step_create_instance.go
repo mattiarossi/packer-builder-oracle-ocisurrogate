@@ -19,7 +19,7 @@ func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 
 	ui.Say("Creating instance...")
 
-	instanceID, err := driver.CreateInstance(ctx, string(config.Comm.SSHPublicKey))
+	instanceID, err := driver.CreateInstance(ctx, string(config.Comm.SSHPublicKey),"")
 	if err != nil {
 		err = fmt.Errorf("Problem creating instance: %s", err)
 		ui.Error(err.Error())
@@ -78,6 +78,7 @@ func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 		return multistep.ActionHalt
 	}
 	ui.Say(fmt.Sprintf("Cloned Volume Attached successfully to instance (%s) with id %s.", instanceID, attachedVolumeID))
+	state.Put("attached_volume_id", attachedVolumeID)
 
 	return multistep.ActionContinue
 }
@@ -110,26 +111,5 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 	}
 
 	ui.Say("Terminated instance.")
-	idVolumeRaw, ok := state.GetOk("cloned_volume_id")
-	idVolume := idVolumeRaw.(string)
-
-
-	ui.Say(fmt.Sprintf("Deleting Volume (%s)...", idVolume))
-	if err := driver.DeleteBootVolume(context.TODO(), idVolume); err != nil {
-		err = fmt.Errorf("Error terminating Surrogate Boot Volume. Please terminate manually: %s", err)
-		ui.Error(err.Error())
-		state.Put("error", err)
-		return
-	}
-
-	err = driver.WaitForBootVolumeState(context.TODO(), idVolume, []string{"TERMINATING"}, "TERMINATED")
-	if err != nil {
-		err = fmt.Errorf("Error terminating instance. Please terminate manually: %s", err)
-		ui.Error(err.Error())
-		state.Put("error", err)
-		return
-	}
-
-	ui.Say("Deleted Volume.")
-
+	
 }

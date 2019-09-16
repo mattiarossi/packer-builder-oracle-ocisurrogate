@@ -10,9 +10,8 @@ systemctl preset zfs-import-cache zfs-import-scan zfs-mount zfs-share zfs-zed zf
 systemctl enable zfs-import-scan
 systemctl list-unit-files | grep zfs
 
-
-
 sgdisk -Zg -n1:2048:+210M -t1:EF00 -c1:EFI -n2:0:+1G -t2:EF02 -c2:GRUB -n3:0:0 -t3:BF01 -c3:ZFS /dev/sdb
+partprobe
 zpool create   -f  -o altroot=/mnt     -o ashift=12     -o cachefile=/etc/zfs/zpool.cache     -O canmount=off     -O compression=lz4     -O atime=off     -O normalization=formD   -o feature@hole_birth=disabled -o feature@embedded_data=disabled -m none     rpool     /dev/sdb3
 zfs create     -o canmount=off     -o mountpoint=none     rpool/ROOT
 zfs create     -o canmount=noauto     -o mountpoint=/     rpool/ROOT/oel

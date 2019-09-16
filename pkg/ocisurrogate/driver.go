@@ -8,9 +8,10 @@ import (
 
 // Driver interfaces between the builder steps and the OCI SDK.
 type Driver interface {
-	CreateInstance(ctx context.Context, publicKey string) (string, error)
+	CreateInstance(ctx context.Context, publicKey string, surrogateVolumeId string) (string, error)
 	CreateBootClone(ctx context.Context, InstanceId string) (string, error)
 	AttachBootClone(ctx context.Context, InstanceId string, VolumeId string) (string, error)
+	DetachBootClone(ctx context.Context, VolumeId string) (string, error)
 	CreateImage(ctx context.Context, id string) (core.Image, error)
 	DeleteImage(ctx context.Context, id string) error
 	GetInstanceIP(ctx context.Context, id string) (string, error)
