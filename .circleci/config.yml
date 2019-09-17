@@ -67,12 +67,3 @@ workflows:
         filters:
           tags:
             only: /^v.*/
-
-    jobs:
-    - install_dependencies
-    - unit_test:
-        requires:
-          - install_dependencies
-    - integration_test:
-        requires:
-          - unit_test
