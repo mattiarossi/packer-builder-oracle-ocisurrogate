@@ -32,7 +32,7 @@ jobs:
     - checkout
     - attach_workspace:
         at: *workspace_root
-    - run: build-go-binaries --circle-ci-2 --app-name terragrunt --dest-path bin --ld-flags "-X main.VERSION=$CIRCLE_TAG"
+    - run: build-go-binaries --circle-ci-2 --app-name packer-builder-oracle-ocisurrogate --dest-path bin --ld-flags "-X main.VERSION=$CIRCLE_TAG"
     - persist_to_workspace:
         root: *workspace_root
         paths: bin
