@@ -111,5 +111,25 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 	}
 
 	ui.Say("Terminated instance.")
+	idSurrogate, ok := state.GetOk("instance_surrogate_id")
+	if ok {
+		ui.Say(fmt.Sprintf("Deleting Surrogate Volume (%s)...", idVolume))
+		if err := driver.DeleteBootVolume(context.TODO(), idVolume); err != nil {
+			err = fmt.Errorf("Error terminating Surrogate Boot Volume. Please terminate manually: %s", err)
+			ui.Error(err.Error())
+			state.Put("error", err)
+			return
+		}
+
+		err = driver.WaitForBootVolumeState(context.TODO(), idVolume, []string{"TERMINATING"}, "TERMINATED")
+		if err != nil {
+			err = fmt.Errorf("Error terminating instance. Please terminate manually: %s", err)
+			ui.Error(err.Error())
+			state.Put("error", err)
+			return
+		}
+
+		ui.Say("Deleted Surrogate Volume.")
+	}
 	
 }
