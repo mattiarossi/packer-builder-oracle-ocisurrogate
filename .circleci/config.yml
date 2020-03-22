@@ -12,11 +12,6 @@ jobs:
     <<: *defaults
     steps:
     - checkout
-    - attach_workspace:
-        at: *workspace_root
-    - persist_to_workspace:
-        root: *workspace_root
-        paths: vendor
 
   build:
     <<: *defaults
