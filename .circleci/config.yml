@@ -14,14 +14,6 @@ jobs:
     - checkout
     - attach_workspace:
         at: *workspace_root
-    - restore_cache:
-        keys:
-        - dep-{{ checksum "Gopkg.lock" }}
-    - run: dep ensure
-    - save_cache:
-        key: dep-{{ checksum "Gopkg.lock" }}
-        paths:
-        - /go/src/github.com/mattiarossi/packer-builder-oracle-ocisurrogate/vendor
     - persist_to_workspace:
         root: *workspace_root
         paths: vendor
