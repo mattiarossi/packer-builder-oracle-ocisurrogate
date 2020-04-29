@@ -10,6 +10,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	server.RegisterBuilder(ocisurrogate.NewBuilder())
+	server.RegisterBuilder(new(ocisurrogate.Builder))
 	server.Serve()
 }
