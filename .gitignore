@@ -1,4 +1,6 @@
+.DS_Store
 /bin
 /local
 packer-builder-oracle-ocisurrogate
 /vendor
+/dist
