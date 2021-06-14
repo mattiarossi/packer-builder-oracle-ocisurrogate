@@ -51,7 +51,7 @@ func (s *stepGetDefaultCredentials) Run(ctx context.Context, state multistep.Sta
 	}
 
 	// store so that we can access this later during provisioning
-        state.Put("winrm_password", s.Comm.WinRMPassword)
+	state.Put("winrm_password", s.Comm.WinRMPassword)
 	packer.LogSecretFilter.Set(s.Comm.WinRMPassword)
 	return multistep.ActionContinue
 }
