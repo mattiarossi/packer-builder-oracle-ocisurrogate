@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 	"log"
+	"time"
 
 	core "github.com/oracle/oci-go-sdk/core"
 )
@@ -13,11 +13,11 @@ import (
 // driverOCI implements the Driver interface and communicates with Oracle
 // OCI.
 type driverOCI struct {
-	computeClient core.ComputeClient
+	computeClient      core.ComputeClient
 	blockstorageClient core.BlockstorageClient
-	vcnClient     core.VirtualNetworkClient
-	cfg           *Config
-	context       context.Context
+	vcnClient          core.VirtualNetworkClient
+	cfg                *Config
+	context            context.Context
 }
 
 // NewDriverOCI Creates a new driverOCI with a connected compute client and a connected vcn client.
@@ -38,9 +38,9 @@ func NewDriverOCI(cfg *Config) (Driver, error) {
 	}
 
 	return &driverOCI{
-		computeClient: coreClient,
-		vcnClient:     vcnClient,
-		cfg:           cfg,
+		computeClient:      coreClient,
+		vcnClient:          vcnClient,
+		cfg:                cfg,
 		blockstorageClient: blockstorageClient,
 	}, nil
 }
@@ -60,33 +60,33 @@ func (d *driverOCI) CreateInstance(ctx context.Context, publicKey string, surrog
 	}
 	var imageId string = d.cfg.BaseImageID
 	if d.cfg.BaseImageName != "" {
-		imageIdList, err := d.computeClient.ListImages(context.TODO(),core.ListImagesRequest{
-			CompartmentId:      &d.cfg.CompartmentID,
-			DisplayName: 		&d.cfg.BaseImageName,
+		imageIdList, err := d.computeClient.ListImages(context.TODO(), core.ListImagesRequest{
+			CompartmentId: &d.cfg.CompartmentID,
+			DisplayName:   &d.cfg.BaseImageName,
 		})
 		if err != nil {
 			return "", err
 		}
 		imageId = *imageIdList.Items[0].Id
 	}
-    var sourcedetails core.InstanceSourceDetails = core.InstanceSourceViaImageDetails{
-		ImageId:            &imageId,
-    	BootVolumeSizeInGBs:	&d.cfg.BootVolumeSizeInGBs,
-    }
-    if surrogateVolumeId != "" {
-    	sourcedetails = core.InstanceSourceViaBootVolumeDetails{
-    		BootVolumeId: &surrogateVolumeId,
-    	}
-    }
-    instanceDetails := core.LaunchInstanceDetails{
+	var sourcedetails core.InstanceSourceDetails = core.InstanceSourceViaImageDetails{
+		ImageId:             &imageId,
+		BootVolumeSizeInGBs: &d.cfg.BootVolumeSizeInGBs,
+	}
+	if surrogateVolumeId != "" {
+		sourcedetails = core.InstanceSourceViaBootVolumeDetails{
+			BootVolumeId: &surrogateVolumeId,
+		}
+	}
+	instanceDetails := core.LaunchInstanceDetails{
 		AvailabilityDomain: &d.cfg.AvailabilityDomain,
 		CompartmentId:      &d.cfg.CompartmentID,
 		Shape:              &d.cfg.Shape,
 		Metadata:           metadata,
-		CreateVnicDetails:	&core.CreateVnicDetails{
-    		SubnetId:           &d.cfg.SubnetID,
-    	},
-		SourceDetails:		&sourcedetails,
+		CreateVnicDetails: &core.CreateVnicDetails{
+			SubnetId: &d.cfg.SubnetID,
+		},
+		SourceDetails: &sourcedetails,
 	}
 
 	// When empty, the default display name is used.
@@ -108,26 +108,25 @@ func (d *driverOCI) CreateBootClone(ctx context.Context, InstanceId string) (str
 	// Get Instance Details
 	log.Printf("Get BootVolumeDetails.")
 
-	BootVolumeDetails,err0 := d.computeClient.ListBootVolumeAttachments(ctx, core.ListBootVolumeAttachmentsRequest{
-			AvailabilityDomain: &d.cfg.AvailabilityDomain,
-			CompartmentId:      &d.cfg.CompartmentID,
-			InstanceId: &InstanceId,
+	BootVolumeDetails, err0 := d.computeClient.ListBootVolumeAttachments(ctx, core.ListBootVolumeAttachmentsRequest{
+		AvailabilityDomain: &d.cfg.AvailabilityDomain,
+		CompartmentId:      &d.cfg.CompartmentID,
+		InstanceId:         &InstanceId,
 	},
-
 	)
-	log.Printf("Boot Volume details: %+v \n",BootVolumeDetails)
+	log.Printf("Boot Volume details: %+v \n", BootVolumeDetails)
 	if err0 != nil {
 		return "", err0
 	}
 	//Clone Boot Volume
-	res, err := d.blockstorageClient.CreateBootVolume(ctx,core. CreateBootVolumeRequest{
+	res, err := d.blockstorageClient.CreateBootVolume(ctx, core.CreateBootVolumeRequest{
 		CreateBootVolumeDetails: core.CreateBootVolumeDetails{
-				AvailabilityDomain: &d.cfg.AvailabilityDomain,
-				CompartmentId:      &d.cfg.CompartmentID,
-				SourceDetails : core.BootVolumeSourceFromBootVolumeDetails {
-					Id: 	BootVolumeDetails.Items[0].BootVolumeId,
-				},
-				SizeInGBs : &d.cfg.BootVolumeSizeInGBs,
+			AvailabilityDomain: &d.cfg.AvailabilityDomain,
+			CompartmentId:      &d.cfg.CompartmentID,
+			SourceDetails: core.BootVolumeSourceFromBootVolumeDetails{
+				Id: BootVolumeDetails.Items[0].BootVolumeId,
+			},
+			SizeInGBs: &d.cfg.BootVolumeSizeInGBs,
 		},
 	})
 	if err != nil {
@@ -140,12 +139,12 @@ func (d *driverOCI) CreateBootClone(ctx context.Context, InstanceId string) (str
 // AttachBootClone attaches a clone of the boot disk to the instance.
 func (d *driverOCI) AttachBootClone(ctx context.Context, InstanceId string, VolumeId string) (string, error) {
 	// Get Instance Details
-	log.Printf("Attaching Cloned Volume %s to instance %s", VolumeId,InstanceId)
+	log.Printf("Attaching Cloned Volume %s to instance %s", VolumeId, InstanceId)
 	res2, err2 := d.computeClient.AttachVolume(ctx, core.AttachVolumeRequest{
-		 AttachVolumeDetails: core. AttachParavirtualizedVolumeDetails{
-		 	VolumeId:	&VolumeId,
-		 	InstanceId:	&InstanceId,
-		 },
+		AttachVolumeDetails: core.AttachParavirtualizedVolumeDetails{
+			VolumeId:   &VolumeId,
+			InstanceId: &InstanceId,
+		},
 	},
 	)
 	if err2 != nil {
@@ -155,12 +154,12 @@ func (d *driverOCI) AttachBootClone(ctx context.Context, InstanceId string, Volu
 }
 
 // DetachBootClone attaches a clone of the boot disk to the instance.
-func (d *driverOCI) DetachBootClone(ctx context.Context,VolumeAttachmentId string) (string, error) {
+func (d *driverOCI) DetachBootClone(ctx context.Context, VolumeAttachmentId string) (string, error) {
 	// Get Instance Details
 	log.Printf("Detaching Cloned Volume Attachment %s", VolumeAttachmentId)
 	res2, err2 := d.computeClient.DetachVolume(ctx, core.DetachVolumeRequest{
-		 VolumeAttachmentId: &VolumeAttachmentId,
-		 },
+		VolumeAttachmentId: &VolumeAttachmentId,
+	},
 	)
 	log.Printf("Detaching Cloned Volume Attachment Request %v", res2)
 
@@ -169,7 +168,6 @@ func (d *driverOCI) DetachBootClone(ctx context.Context,VolumeAttachmentId strin
 	}
 	return VolumeAttachmentId, nil
 }
-
 
 // CreateImage creates a new custom image.
 func (d *driverOCI) CreateImage(ctx context.Context, id string) (core.Image, error) {
@@ -251,7 +249,6 @@ func (d *driverOCI) DeleteBootVolume(ctx context.Context, id string) error {
 	return err
 }
 
-
 // WaitForImageCreation waits for a provisioning custom image to reach the
 // "AVAILABLE" state.
 func (d *driverOCI) WaitForImageCreation(ctx context.Context, id string) error {
@@ -290,7 +287,6 @@ func (d *driverOCI) WaitForInstanceState(ctx context.Context, id string, waitSta
 	)
 }
 
-
 // WaitForBootVolumeState waits for a Volume to reach the a given terminal
 // state.
 func (d *driverOCI) WaitForBootVolumeState(ctx context.Context, id string, waitStates []string, terminalState string) error {
@@ -328,7 +324,6 @@ func (d *driverOCI) WaitForVolumeAttachmentState(ctx context.Context, id string,
 		5*time.Second, //5 second wait between retries
 	)
 }
-
 
 // WaitForResourceToReachState checks the response of a request through a
 // polled get and waits until the desired state or until the max retried has
