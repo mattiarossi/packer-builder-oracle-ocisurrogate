@@ -12,7 +12,7 @@ type driverMock struct {
 	CreateInstanceID  string
 	CreateInstanceErr error
 
-	CreateBootCloneID string
+	CreateBootCloneID  string
 	CreateBootCloneErr error
 
 	CreateImageID  string

@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 type stepCreateInstance struct{}
@@ -19,7 +19,7 @@ func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 
 	ui.Say("Creating instance...")
 
-	instanceID, err := driver.CreateInstance(ctx, string(config.Comm.SSHPublicKey),"")
+	instanceID, err := driver.CreateInstance(ctx, string(config.Comm.SSHPublicKey), "")
 	if err != nil {
 		err = fmt.Errorf("Problem creating instance: %s", err)
 		ui.Error(err.Error())
@@ -53,7 +53,7 @@ func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 	ui.Say("Surrogate Boot Volume Cloned.")
 	state.Put("cloned_volume_id", clonedVolumeID)
 	ui.Say("Waiting for Cloned Volume to enter 'AVAILABLE' state...")
-	if err = driver.WaitForBootVolumeState(ctx, clonedVolumeID, []string{"PROVISIONING","RESTORING"}, "AVAILABLE"); err != nil {
+	if err = driver.WaitForBootVolumeState(ctx, clonedVolumeID, []string{"PROVISIONING", "RESTORING"}, "AVAILABLE"); err != nil {
 		err = fmt.Errorf("Error waiting for Volume to be available: %s", err)
 		ui.Error(err.Error())
 		state.Put("error", err)
@@ -70,7 +70,7 @@ func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 		return multistep.ActionHalt
 	}
 	ui.Say("Surrogate Boot Volume Attachment created.")
-	ui.Say(fmt.Sprintf("Waiting for Attached Volume %s to enter 'ATTACHED' state...",attachedVolumeID))
+	ui.Say(fmt.Sprintf("Waiting for Attached Volume %s to enter 'ATTACHED' state...", attachedVolumeID))
 	if err = driver.WaitForVolumeAttachmentState(ctx, attachedVolumeID, []string{"ATTACHING"}, "ATTACHED"); err != nil {
 		err = fmt.Errorf("Error waiting for Volume to be attached: %s", err)
 		ui.Error(err.Error())
@@ -136,5 +136,5 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 
 		ui.Say("Deleted Surrogate Volume.")
 	}
-	
+
 }
