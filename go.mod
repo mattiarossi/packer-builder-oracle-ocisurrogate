@@ -7,6 +7,6 @@ require (
 	github.com/hashicorp/hcl/v2 v2.8.0
 	github.com/hashicorp/packer v1.6.7-0.20210217093213-201869d627bf
 	github.com/hashicorp/packer-plugin-sdk v0.0.14
-	github.com/oracle/oci-go-sdk v19.0.0+incompatible
+	github.com/oracle/oci-go-sdk/v36 v36.2.0
 	github.com/zclconf/go-cty v1.7.0
 )

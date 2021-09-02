@@ -447,9 +447,12 @@ github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d/go.mod h1:YUTz3bUH
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
 github.com/olekukonko/tablewriter v0.0.0-20180105111133-96aac992fc8b/go.mod h1:vsDQFd/mU46D+Z4whnwzcISnGGzXWMclvtLoiIKAKIo=
 github.com/opentracing/opentracing-go v1.1.0/go.mod h1:UkNAQd3GIcIGf0SeVgPpRdFStlNbqXla1AfSYxPUl2o=
+github.com/oracle/oci-go-sdk v18.0.0+incompatible h1:FLV4KixsVfF3rwyVTMI6Ryp/Q+OSb9sR5TawbfjFLN4=
 github.com/oracle/oci-go-sdk v18.0.0+incompatible/go.mod h1:VQb79nF8Z2cwLkLS35ukwStZIg5F66tcBccjip/j888=
 github.com/oracle/oci-go-sdk v19.0.0+incompatible h1:UQnOTZBLEtrqNnJ7jQJiaadScBQ7+CF61+OIvWktkoc=
 github.com/oracle/oci-go-sdk v19.0.0+incompatible/go.mod h1:VQb79nF8Z2cwLkLS35ukwStZIg5F66tcBccjip/j888=
+github.com/oracle/oci-go-sdk/v36 v36.2.0 h1:oBaN/FnBDy3ohMyVZ/rKfekYxnyksG2KK0YAhT5HSnk=
+github.com/oracle/oci-go-sdk/v36 v36.2.0/go.mod h1:t8Y/M3Lh8X4BOJhtThJKe1skRTg7qom7oWyHiNjo4RM=
 github.com/outscale/osc-sdk-go/osc v0.0.0-20200722135656-d654809d0699/go.mod h1:5AqqNH1X8zCHescKVlpSHRzrat1KCKDXqZoQPe8fY3A=
 github.com/packer-community/winrmcp v0.0.0-20180921204643-0fd363d6159a h1:A3QMuteviunoaY/8ex+RKFqwhcZJ/Cf3fCW3IwL2wx4=
 github.com/packer-community/winrmcp v0.0.0-20180921204643-0fd363d6159a/go.mod h1:f6Izs6JvFTdnRbziASagjZ2vmf55NSIkC/weStxCHqk=
