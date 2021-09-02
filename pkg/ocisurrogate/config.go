@@ -19,9 +19,14 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/pathing"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
-	ocicommon "github.com/oracle/oci-go-sdk/common"
-	ociauth "github.com/oracle/oci-go-sdk/common/auth"
+	ocicommon "github.com/oracle/oci-go-sdk/v36/common"
+	ociauth "github.com/oracle/oci-go-sdk/v36/common/auth"
 )
+
+type FlexShapeConfig struct {
+	Ocpus       *float32 `mapstructure:"ocpus" required:"false"`
+	MemoryInGBs *float32 `mapstructure:"memory_in_gbs" required:"false"`
+}
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
@@ -59,11 +64,13 @@ type Config struct {
 	// Image
 	BaseImageID         string `mapstructure:"base_image_ocid"`
 	BaseImageName       string `mapstructure:"base_image_name"`
-	Shape               string `mapstructure:"shape"`
 	ImageName           string `mapstructure:"image_name"`
-	BootVolumeSizeInGBs int64  `mapstructure:"bootvolumesize"`
+
 	// Instance
 	InstanceName string `mapstructure:"instance_name"`
+	Shape               string `mapstructure:"shape"`
+	ShapeConfig         FlexShapeConfig `mapstructure:"shape_config"`
+	BootVolumeSizeInGBs int64  `mapstructure:"bootvolumesize"`
 
 	// Metadata optionally contains custom metadata key/value pairs provided in the
 	// configuration. While this can be used to set metadata["user_data"] the explicit
@@ -194,7 +201,7 @@ func (c *Config) Prepare(raws ...interface{}) error {
 		}
 
 		providers := []ocicommon.ConfigurationProvider{
-			NewRawConfigurationProvider(c.TenancyID, c.UserID, c.Region, c.Fingerprint, string(keyContent), &c.PassPhrase),
+			ocicommon.NewRawConfigurationProvider(c.TenancyID, c.UserID, c.Region, c.Fingerprint, string(keyContent), &c.PassPhrase),
 		}
 
 		if fileProvider != nil {
@@ -243,6 +250,18 @@ func (c *Config) Prepare(raws ...interface{}) error {
 	if c.Shape == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("'shape' must be specified"))
+	}
+
+	if strings.HasSuffix(c.Shape, "Flex") {
+		if c.ShapeConfig.Ocpus == nil {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("'Ocpus' must be specified when using flexible shapes"))
+		}
+	}
+
+	if c.ShapeConfig.MemoryInGBs != nil && c.ShapeConfig.Ocpus == nil {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("'Ocpus' must be specified if memory_in_gbs is specified"))
 	}
 
 	if c.SubnetID == "" {
