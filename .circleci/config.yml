@@ -14,9 +14,10 @@ jobs:
   release:
     docker:
       - image: cimg/go:1.18
+    resource_class: large  
     steps:
       - checkout
       - run: 
-        name: build
-        no_output_timeout: 60m
-        command: curl -sL https://git.io/goreleaser | bash
+          name: build
+          no_output_timeout: 60m
+          command: curl -sL https://git.io/goreleaser | bash
