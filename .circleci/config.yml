@@ -16,4 +16,7 @@ jobs:
       - image: cimg/go:1.18
     steps:
       - checkout
-      - run: curl -sL https://git.io/goreleaser | bash
+      - run: 
+        name: build
+        no_output_timeout: 60m
+        command: curl -sL https://git.io/goreleaser | bash
