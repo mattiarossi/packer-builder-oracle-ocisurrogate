@@ -35,7 +35,7 @@ require (
 	github.com/ugorji/go/codec v1.2.10 // indirect
 	github.com/ulikunitz/xz v0.5.11 // indirect
 	github.com/zclconf/go-cty v1.12.1
-	golang.org/x/crypto v0.17.0 // indirect
+	golang.org/x/crypto v0.35.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	google.golang.org/genproto v0.0.0-20230222225845-10f96fb3dbec // indirect
 )
