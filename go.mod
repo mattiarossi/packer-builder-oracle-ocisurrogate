@@ -33,7 +33,7 @@ require (
 	github.com/pkg/sftp v1.13.5 // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
 	github.com/ugorji/go/codec v1.2.10 // indirect
-	github.com/ulikunitz/xz v0.5.11 // indirect
+	github.com/ulikunitz/xz v0.5.14 // indirect
 	github.com/zclconf/go-cty v1.12.1
 	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
