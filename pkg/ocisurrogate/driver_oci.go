@@ -22,17 +22,17 @@ type driverOCI struct {
 
 // NewDriverOCI Creates a new driverOCI with a connected compute client and a connected vcn client.
 func NewDriverOCI(cfg *Config) (Driver, error) {
-	coreClient, err := core.NewComputeClientWithConfigurationProvider(cfg.configProvider)
+	coreClient, err := core.NewComputeClientWithConfigurationProvider(cfg.ConfigProvider)
 	if err != nil {
 		return nil, err
 	}
 
-	vcnClient, err := core.NewVirtualNetworkClientWithConfigurationProvider(cfg.configProvider)
+	vcnClient, err := core.NewVirtualNetworkClientWithConfigurationProvider(cfg.ConfigProvider)
 	if err != nil {
 		return nil, err
 	}
 
-	blockstorageClient, err := core.NewBlockstorageClientWithConfigurationProvider(cfg.configProvider)
+	blockstorageClient, err := core.NewBlockstorageClientWithConfigurationProvider(cfg.ConfigProvider)
 	if err != nil {
 		return nil, err
 	}

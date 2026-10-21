@@ -86,7 +86,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return nil, rawErr.(error)
 	}
 
-	region, err := b.config.configProvider.Region()
+	region, err := b.config.ConfigProvider.Region()
 	if err != nil {
 		return nil, err
 	}

@@ -34,7 +34,7 @@ type driverMock struct {
 }
 
 // CreateInstance creates a new compute instance.
-func (d *driverMock) CreateInstance(ctx context.Context, publicKey string) (string, error) {
+func (d *driverMock) CreateInstance(ctx context.Context, publicKey string, surrogateVolumeId string) (string, error) {
 	if d.CreateInstanceErr != nil {
 		return "", d.CreateInstanceErr
 	}
@@ -53,6 +53,26 @@ func (d *driverMock) CreateBootClone(ctx context.Context, InstanceId string) (st
 	d.CreateBootCloneID = "ocid1..."
 
 	return d.CreateBootCloneID, nil
+}
+
+func (d *driverMock) AttachBootClone(ctx context.Context, InstanceId string, VolumeId string) (string, error) {
+	return VolumeId, nil
+}
+
+func (d *driverMock) DetachBootClone(ctx context.Context, VolumeId string) (string, error) {
+	return VolumeId, nil
+}
+
+func (d *driverMock) DeleteBootVolume(ctx context.Context, id string) error {
+	return nil
+}
+
+func (d *driverMock) WaitForBootVolumeState(ctx context.Context, id string, waitStates []string, terminalState string) error {
+	return nil
+}
+
+func (d *driverMock) WaitForVolumeAttachmentState(ctx context.Context, id string, waitStates []string, terminalState string) error {
+	return nil
 }
 
 // CreateImage creates a new custom image.

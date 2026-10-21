@@ -32,7 +32,7 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
 
-	configProvider ocicommon.ConfigurationProvider
+	ConfigProvider ocicommon.ConfigurationProvider
 
 	// Instance Principals (OPTIONAL)
 	// If set to true the following can't have non empty values
@@ -93,8 +93,12 @@ type Config struct {
 	ctx interpolate.Context
 }
 
-func (c *Config) ConfigProvider() ocicommon.ConfigurationProvider {
-	return c.configProvider
+func NewConfig(raws ...interface{}) (*Config, error) {
+	c := &Config{}
+	if err := c.Prepare(raws...); err != nil {
+		return nil, err
+	}
+	return c, nil
 }
 
 func (c *Config) Prepare(raws ...interface{}) error {
@@ -120,44 +124,44 @@ func (c *Config) Prepare(raws ...interface{}) error {
 		// of keys cannot coexist with use_instance_principals but decided to
 		// split them and report them seperately so that the user sees the specific
 		// key involved.
-		var message string = " cannot be present when use_instance_principals is set to true."
+		message := " cannot be present when use_instance_principals is set to true."
 		if c.AccessCfgFile != "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("access_cfg_file"+message))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("%s%s", "access_cfg_file", message))
 		}
 		if c.AccessCfgFileAccount != "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("access_cfg_file_account"+message))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("%s%s", "access_cfg_file_account", message))
 		}
 		if c.UserID != "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("user_ocid"+message))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("%s%s", "user_ocid", message))
 		}
 		if c.TenancyID != "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("tenancy_ocid"+message))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("%s%s", "tenancy_ocid", message))
 		}
 		if c.Region != "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("region"+message))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("%s%s", "region", message))
 		}
 		if c.Fingerprint != "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("fingerprint"+message))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("%s%s", "fingerprint", message))
 		}
 		if c.KeyFile != "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("key_file"+message))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("%s%s", "key_file", message))
 		}
 		if c.PassPhrase != "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("pass_phrase"+message))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("%s%s", "pass_phrase", message))
 		}
 		// This check is used to facilitate testing. During testing a Mock struct
-		// is assigned to c.configProvider otherwise testing fails because Instance
+		// is assigned to c.ConfigProvider otherwise testing fails because Instance
 		// Principals cannot be obtained.
-		if c.configProvider == nil {
+		if c.ConfigProvider == nil {
 			// Even though the previous configuraion checks might fail we don't want
 			// to skip this step. It seems that the logic behind the checks in this
 			// file is to check everything even getting the configProvider.
-			c.configProvider, err = ociauth.InstancePrincipalConfigurationProvider()
+			c.ConfigProvider, err = ociauth.InstancePrincipalConfigurationProvider()
 			if err != nil {
 				return err
 			}
 		}
-		tenancyOCID, err = c.configProvider.TenancyOCID()
+		tenancyOCID, err = c.ConfigProvider.TenancyOCID()
 		if err != nil {
 			return err
 		}
@@ -235,7 +239,7 @@ func (c *Config) Prepare(raws ...interface{}) error {
 				errs, errors.New("'key_file' must be specified"))
 		}
 
-		c.configProvider = configProvider
+		c.ConfigProvider = configProvider
 	}
 
 	if c.AvailabilityDomain == "" {
