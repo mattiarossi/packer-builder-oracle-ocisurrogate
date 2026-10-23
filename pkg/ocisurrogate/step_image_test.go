@@ -11,6 +11,8 @@ import (
 func TestStepImage(t *testing.T) {
 	state := testState()
 	state.Put("instance_id", "ocid1...")
+	state.Put("cloned_volume_id", "ocid1.volume")
+	state.Put("attached_volume_id", "ocid1.attachment")
 
 	step := new(stepImage)
 	defer step.Cleanup(state)
@@ -27,6 +29,8 @@ func TestStepImage(t *testing.T) {
 func TestStepImage_CreateImageErr(t *testing.T) {
 	state := testState()
 	state.Put("instance_id", "ocid1...")
+	state.Put("cloned_volume_id", "ocid1.volume")
+	state.Put("attached_volume_id", "ocid1.attachment")
 
 	step := new(stepImage)
 	defer step.Cleanup(state)
@@ -50,6 +54,8 @@ func TestStepImage_CreateImageErr(t *testing.T) {
 func TestStepImage_WaitForImageCreationErr(t *testing.T) {
 	state := testState()
 	state.Put("instance_id", "ocid1...")
+	state.Put("cloned_volume_id", "ocid1.volume")
+	state.Put("attached_volume_id", "ocid1.attachment")
 
 	step := new(stepImage)
 	defer step.Cleanup(state)
